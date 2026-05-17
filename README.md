@@ -74,7 +74,7 @@ pressure 2-3 weeks ahead.
 ## Project Status
 
 - [x] Repository structure initialized
-- [ ] Layer 1: EIA ingestion script
+- [X] Layer 1: EIA ingestion script
 - [ ] Layer 1: BDI ingestion script  
 - [ ] Layer 2: S3 storage with Hive partitioning
 - [ ] Layer 3: dbt Silver models
