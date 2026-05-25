@@ -36,7 +36,7 @@ UN Comtrade (India)      ──┘                              Supply Chain Str
 | Source | What it provides | Update frequency |
 |--------|-----------------|-----------------|
 | [EIA API](https://www.eia.gov/opendata/) | US crude oil inventory levels | Daily |
-| Baltic Dry Index | Global shipping cost proxy | Daily |
+| FRED PPIFIS (Shipping Cost Proxy) | Producer Price Index for Transportation & Warehousing — used as BDI proxy (direct BDI access requires paid Baltic Exchange subscription) | Monthly |
 | [UN Comtrade](https://comtradeplus.un.org/) | India petroleum import volumes | Monthly |
 
 ---
