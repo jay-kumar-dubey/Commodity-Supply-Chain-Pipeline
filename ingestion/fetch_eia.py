@@ -34,6 +34,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
+import boto3
 
 load_dotenv()
 
@@ -87,6 +88,18 @@ def save_raw_response(data: dict, fetch_date: str) -> str:
         json.dump(data, f, indent=4)
     return str(file_path)
 
+def upload_to_s3(local_file_path: str, s3_key: str) -> None:
+
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID'),
+        aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY'),
+        region_name = os.environ.get('AWS_REGION')
+    )
+
+    bucket = os.environ.get('AWS_BUCKET_NAME')
+    s3.upload_file(local_file_path, bucket, s3_key)
+    print(f"Uploaded to S3: //{bucket} / {s3_key}")
 
 def main():
     today = datetime.today().strftime("%Y-%m-%d")
@@ -101,6 +114,11 @@ def main():
     
     file_path = save_raw_response(raw_data, today)
     print(f"Saved to: {file_path}")
+
+    year = datetime.today().strftime("%Y")
+    month = datetime.today().strftime("%m")
+    s3_key = f"bronze/eia_oil_prices/year={year}/month={month}/raw_{today}.json"
+    upload_to_s3(file_path, s3_key)
 
 
 if __name__ == "__main__":
