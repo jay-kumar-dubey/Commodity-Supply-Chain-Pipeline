@@ -1,0 +1,18 @@
+{{ config(materialized='table') }}
+
+SELECT 
+    index_date,
+    AVG(index_value) as index_value
+FROM (
+    SELECT 
+        CAST(record.date as date) as index_date,
+        CAST(record.value as float) as index_value
+    FROM (
+        SELECT unnest(observations) as record
+        FROM read_json_auto('../data/bronze/baltic_dry_index/*.json')
+    )
+    WHERE CAST(record.value as float) IS NOT NULL
+    AND CAST(record.date as date) IS NOT NULL
+)
+GROUP BY index_date
+ORDER BY index_date DESC
