@@ -77,7 +77,7 @@ pressure 2-3 weeks ahead.
 - [X] Layer 1: EIA ingestion script
 - [X] Layer 1: BDI ingestion script  
 - [X] Layer 2: S3 storage with Hive partitioning
-- [ ] Layer 3: dbt Silver models
+- [X] Layer 3: dbt Silver models
 - [ ] Layer 3: dbt Gold models + stress score
 - [ ] Layer 4: Airflow DAG
 - [ ] Layer 5: Streamlit dashboard
