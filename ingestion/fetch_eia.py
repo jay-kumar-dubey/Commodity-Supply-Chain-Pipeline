@@ -62,7 +62,15 @@ def fetch_wti_prices(start_date: str, end_date: str) -> dict:
         'start': start_date,
         'end': end_date
     }
-    response = requests.get(BASE_URL, params=params)
+    try:
+        response = requests.get(BASE_URL, params=params)
+        response.raise_for_status()
+    except requests.exceptions.ConnectionError as e:
+        error_msg = str(e).replace(API_KEY, "***")
+        raise ConnectionError(f"Network error connecting to EIA API: {error_msg}")
+    except requests.exceptions.HTTPError as e:
+        error_msg = str(e).replace(API_KEY, "***")
+        raise RuntimeError(f"EIA API returned an error: {error_msg}")
     data = response.json()
 
     # call response.raise_for_status() to handle errors

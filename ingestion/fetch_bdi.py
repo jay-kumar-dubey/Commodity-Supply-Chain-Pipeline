@@ -27,13 +27,20 @@ def bdi_data(start_date: str, end_date: str) -> dict:
     "observation_start": start_date,
     "observation_end": end_date
     }
-    response = requests.get(BASE_URL, params=params)
+    try:
+        response = requests.get(BASE_URL, params=params)
+        response.raise_for_status()
+    except requests.exceptions.ConnectionError as e:
+        error_msg = str(e).replace(API_KEY, "***")
+        raise ConnectionError(f"Network error connecting to FRED API: {error_msg}")
+    except requests.exceptions.HTTPError as e:
+        error_msg = str(e).replace(API_KEY, "***")
+        raise RuntimeError(f"FRED API returned an error: {error_msg}")
     data = response.json()
 
-    if not data['observations']: 
+    if not data['observations']:
         raise ValueError(f"API returned empty data for range {start_date} to {end_date}")
-    if response.status_code == 200:
-        return data
+    return data
 
 def save_raw_response(data: dict, fetch_month: str) -> str:
     folder_path = Path("data/bronze/baltic_dry_index")
