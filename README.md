@@ -80,7 +80,7 @@ pressure 2-3 weeks ahead.
 - [X] Layer 3: dbt Silver models
 - [X] Layer 3: dbt Gold models + stress score
 - [X] Layer 4: Prefect orchestration flow (sequential execution)
-- [ ] Layer 5: Streamlit dashboard
+- [X] Layer 5: Streamlit dashboard
 
 ---
 
