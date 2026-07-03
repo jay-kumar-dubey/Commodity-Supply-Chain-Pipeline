@@ -1,38 +1,8 @@
-# import requests
-# import os
-# from dotenv import load_dotenv
-
-# load_dotenv()
-
-# API_KEY = os.environ.get("EIA_API_KEY")
-
-# BASE_URL = "https://api.eia.gov/v2/petroleum/pri/spt/data/"
-
-# params = {
-#     "api_key": API_KEY,
-#     "frequency": "daily",
-#     "data[0]": "value",
-#     "facets[product][]": "EPCWTI",
-#     "facets[duoarea][]": "YCUOK",
-#     "sort[0][column]": "period",
-#     "sort[0][direction]": "desc",
-#     "sort[1][column]": "value",
-#     "sort[1][direction]": "asc",
-#     "length": 5
-# }
-
-# response = requests.get(BASE_URL, params=params)
-# data = response.json()
-# records = data['response']['data']
-
-# for r in records:
-#     print(r)
-
 import requests
 import os
 import json
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime , timedelta
 from dotenv import load_dotenv
 import boto3
 
@@ -111,7 +81,7 @@ def upload_to_s3(local_file_path: str, s3_key: str) -> None:
 
 def main():
     today = datetime.today().strftime("%Y-%m-%d")
-    start = "2025-01-01"
+    start = (datetime.today() - timedelta(days=40)).strftime("%Y-%m-%d")
 
     print(f"Fetching WTI prices from {start} to {today}...")
     
