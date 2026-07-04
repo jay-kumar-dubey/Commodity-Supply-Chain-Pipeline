@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 import pandas as pd
 import os
 from datetime import datetime
+import pyarrow.parquet as pq
+import io
 
 st.set_page_config(
     page_title="Commodity Supply Chain Stress Signal",
@@ -30,12 +32,40 @@ st.markdown("""
 DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'commodity_pipeline.duckdb')
 
 @st.cache_data(ttl=3600)
+def is_cloud():
+    try:
+        _ = st.secrets["AWS_ACCESS_KEY_ID"]
+        return True
+    except:
+        return False
+
+@st.cache_data(ttl=3600)
 def load_data():
-    conn = duckdb.connect(DB_PATH, read_only=True)
-    df = conn.execute("SELECT * FROM main.gold_stress_signal ORDER BY month ASC").fetchdf()
-    conn.close()
+    if is_cloud():
+        import boto3
+        s3 = boto3.client(
+            's3',
+            aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
+            aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"],
+            region_name=st.secrets["AWS_REGION"]
+        )
+        buffer = io.BytesIO()
+        s3.download_fileobj(
+            st.secrets["AWS_BUCKET_NAME"],
+            "gold/gold_stress_signal.parquet",
+            buffer
+        )
+        buffer.seek(0)
+        df = pq.read_table(buffer).to_pandas()
+    else:
+        conn = duckdb.connect(DB_PATH, read_only=True)
+        df = conn.execute(
+            "SELECT * FROM main.gold_stress_signal ORDER BY month ASC"
+        ).fetchdf()
+        conn.close()
+
     df['month'] = pd.to_datetime(df['month'])
-    return df
+    return df.sort_values('month').reset_index(drop=True)
 
 df = load_data()
 latest = df.iloc[-1]

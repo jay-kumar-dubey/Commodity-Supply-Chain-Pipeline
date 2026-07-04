@@ -7,3 +7,4 @@ __pycache__/
 .DS_Store
 logs/
 *.duckdb
+dashboard/.streamlit/secrets.toml
