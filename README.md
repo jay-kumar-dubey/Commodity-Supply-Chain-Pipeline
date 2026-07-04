@@ -76,7 +76,7 @@ pressure 2-3 weeks ahead.
 - [x] Repository structure initialized
 - [X] Layer 1: EIA ingestion script
 - [X] Layer 1: BDI ingestion script  
-- [X] Layer 2: S3 storage with Hive partitioning
+- [x] Layer 2: S3 storage with Hive partitioning (Bronze JSON + Silver/Gold Parquet)
 - [X] Layer 3: dbt Silver models
 - [X] Layer 3: dbt Gold models + stress score
 - [X] Layer 4: Prefect orchestration flow (sequential execution)
