@@ -1,4 +1,8 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='table',
+    post_hook="{{ export_to_s3('silver_shipping_index', 'silver/baltic_dry_index') }}"
+) }}
+
 
 SELECT 
     index_date,

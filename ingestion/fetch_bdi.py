@@ -69,7 +69,7 @@ def upload_to_s3(local_file_path:str, s3_key: str) -> None:
     print(f"Upload to s3: // {bucket}/ {s3_key}")
 
 def main():
-    start = "2025-01-01"
+    start = "2005-01-01"
     today = datetime.today().strftime("%Y-%m-%d")
     fetch_month = datetime.today().strftime("%Y-%m")
     

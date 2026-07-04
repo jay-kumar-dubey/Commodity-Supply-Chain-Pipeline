@@ -1,4 +1,8 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='table',
+    post_hook="{{ export_to_s3('silver_eia_oil_prices', 'silver/eia_oil_prices') }}"
+) }}
+
 
 SELECT 
     price_date,

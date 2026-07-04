@@ -1,4 +1,9 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='table',
+    post_hook="{{ export_to_s3('gold_stress_signal', 'gold') }}"
+) }}
+
+
 WITH monthly_oil AS (
     SELECT 
         DATE_TRUNC('month', price_date) as month,
