@@ -40,32 +40,29 @@ def is_cloud():
         return False
 
 @st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600)
 def load_data():
-    if is_cloud():
-        import boto3
-        s3 = boto3.client(
-            's3',
-            aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
-            aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"],
-            region_name=st.secrets["AWS_REGION"]
-        )
-        buffer = io.BytesIO()
-        s3.download_fileobj(
-            st.secrets["AWS_BUCKET_NAME"],
-            "gold/gold_stress_signal.parquet",
-            buffer
-        )
-        buffer.seek(0)
-        df = pq.read_table(buffer).to_pandas()
-    else:
-        conn = duckdb.connect(DB_PATH, read_only=True)
-        df = conn.execute(
-            "SELECT * FROM main.gold_stress_signal ORDER BY month ASC"
-        ).fetchdf()
-        conn.close()
+    import boto3
 
-    df['month'] = pd.to_datetime(df['month'])
-    return df.sort_values('month').reset_index(drop=True)
+    s3 = boto3.client(
+        "s3",
+        aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
+        aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"],
+        region_name=st.secrets["AWS_REGION"],
+    )
+    buffer = io.BytesIO()
+
+    s3.download_fileobj(
+        st.secrets["AWS_BUCKET_NAME"],
+        "gold/gold_stress_signal.parquet",
+        buffer,
+    )
+
+    buffer.seek(0)
+    df = pq.read_table(buffer).to_pandas()
+
+    df["month"] = pd.to_datetime(df["month"])
+    return df.sort_values("month").reset_index(drop=True)
 
 df = load_data()
 latest = df.iloc[-1]
