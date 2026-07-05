@@ -8,3 +8,6 @@ __pycache__/
 logs/
 *.duckdb
 dashboard/.streamlit/secrets.toml
+dbt_pipeline/target/
+__pycache__/
+*.pyc
