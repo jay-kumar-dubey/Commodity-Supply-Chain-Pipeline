@@ -7,8 +7,12 @@ a supply chain stress signal dashboard showing 2-3 week leading indicators
 of price volatility.
 
 ---
+
 ## 🚀 Live Dashboard
 **[View Live Dashboard →](https://commodity-supply-chain-pipeline.streamlit.app/)**
+
+## Architecture
+![Pipeline Architecture](docs/architecture.png)
 
 ## The Business Problem
 
