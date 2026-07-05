@@ -56,7 +56,5 @@ def commodity_pipeline_flow():
     run_dbt_task()
 
 if __name__ == "__main__":
-    commodity_pipeline_flow.serve(
-        name="monthly-commodity-pipeline",
-        cron="0 9 5 * *"
-    )
+    commodity_pipeline_flow()
+    
