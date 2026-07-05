@@ -40,7 +40,6 @@ def is_cloud():
         return False
 
 @st.cache_data(ttl=3600)
-@st.cache_data(ttl=3600)
 def load_data():
     import boto3
 
