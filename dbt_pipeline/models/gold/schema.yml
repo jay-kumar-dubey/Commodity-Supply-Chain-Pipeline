@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: gold_stress_signal
+    description: "Monthly supply chain stress signal — composite of oil and shipping MoM changes"
+    columns:
+      - name: month
+        description: "First day of the month"
+        tests:
+          - not_null
+          - unique
+      - name: avg_oil_price
+        description: "Average WTI oil price for the month"
+        tests:
+          - not_null
+      - name: shipping_index
+        description: "Average PPIFIS shipping index for the month"
+        tests:
+          - not_null
+      - name: stress_signal
+        description: "Composite stress signal — shipping MoM% minus oil MoM%"
+        tests:
+          - not_null

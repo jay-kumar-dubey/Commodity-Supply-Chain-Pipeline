@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: silver_eia_oil_prices
+    description: "Cleaned and deduplicated WTI crude oil daily spot prices"
+    columns:
+      - name: price_date
+        description: "Trading date"
+        tests:
+          - not_null
+          - unique
+      - name: price_usd
+        description: "WTI spot price in USD per barrel"
+        tests:
+          - not_null
+
+  - name: silver_shipping_index
+    description: "Cleaned FRED PPIFIS monthly shipping cost index"
+    columns:
+      - name: index_date
+        description: "First day of the month"
+        tests:
+          - not_null
+          - unique
+      - name: index_value
+        description: "PPIFIS index value"
+        tests:
+          - not_null
