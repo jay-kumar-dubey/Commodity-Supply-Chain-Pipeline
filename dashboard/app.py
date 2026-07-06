@@ -32,38 +32,44 @@ st.markdown("""
 DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'commodity_pipeline.duckdb')
 
 @st.cache_data(ttl=3600)
-def is_cloud():
-    try:
-        _ = st.secrets["AWS_ACCESS_KEY_ID"]
-        return True
-    except:
-        return False
-
-@st.cache_data(ttl=3600)
 def load_data():
-    import boto3
+    try:
+        bucket = st.secrets["AWS_BUCKET_NAME"]
+        import boto3
 
-    s3 = boto3.client(
-        "s3",
-        aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
-        aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"],
-        region_name=st.secrets["AWS_REGION"],
-    )
-    buffer = io.BytesIO()
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
+            aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"],
+            region_name=st.secrets["AWS_REGION"],
+        )
 
-    s3.download_fileobj(
-        st.secrets["AWS_BUCKET_NAME"],
-        "gold/gold_stress_signal.parquet",
-        buffer,
-    )
+        buffer = io.BytesIO()
+        s3.download_fileobj(bucket, "gold/gold_stress_signal.parquet", buffer)
+        buffer.seek(0)
+        df = pq.read_table(buffer).to_pandas()
 
-    buffer.seek(0)
-    df = pq.read_table(buffer).to_pandas()
+    except Exception as e:
+        st.warning(f"S3 load failed, falling back to local DB: {e}")
+        conn = duckdb.connect(DB_PATH, read_only=True)
+        df = conn.execute("""
+            SELECT * FROM gold_stress_signal ORDER BY month ASC
+        """).fetchdf()
+        conn.close()
 
     df["month"] = pd.to_datetime(df["month"])
-    return df.sort_values("month").reset_index(drop=True)
+    return df
+
 
 df = load_data()
+
+if len(df) < 2:
+    st.error(
+        f"Expected at least 2 rows but found {len(df)}."
+    )
+    st.dataframe(df)
+    st.stop()
+
 latest = df.iloc[-1]
 prev = df.iloc[-2]
 
