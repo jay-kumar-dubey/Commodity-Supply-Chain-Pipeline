@@ -169,7 +169,7 @@ Commodity-Supply-Chain-Pipeline/
 │       └── pipeline.yml          # GitHub Actions — automated monthly execution
 ├── ingestion/
 │   ├── fetch_eia.py              # EIA WTI oil price fetcher
-│   └── fetch_bdi.py              # FRED PPIFIS shipping index fetcher
+│   └── fetch_ppifis.py            # FRED PPIFIS shipping index fetcher
 ├── dbt_pipeline/
 │   ├── models/
 │   │   ├── silver/
