@@ -29,13 +29,21 @@ def fetch_bdi_task():
 
 @task(name="run_dbt_transformations", retries=1, retry_delay_seconds=30)
 def run_dbt_task():
+    import sys
     logger = get_run_logger()
     logger.info("Running dbt transformations...")
     
     dbt_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'dbt_pipeline')
     
+    # Find dbt executable relative to current Python installation
+    python_dir = os.path.dirname(sys.executable)
+    dbt_executable = os.path.join(python_dir, 'dbt')
+    
+    logger.info(f"Using dbt at: {dbt_executable}")
+    logger.info(f"Running from: {dbt_dir}")
+    
     result = subprocess.run(
-        ["python", "-m", "dbt", "run"],
+        [dbt_executable, "run"],
         cwd=dbt_dir,
         capture_output=True,
         text=True,
@@ -43,13 +51,14 @@ def run_dbt_task():
     )
     
     logger.info(result.stdout)
-    logger.error(result.stderr)
+    if result.stderr:
+        logger.error(result.stderr)
     
     if result.returncode != 0:
         raise RuntimeError(f"dbt run failed with return code {result.returncode}")
     
     logger.info("dbt transformations complete.")
-
+    
 @flow(name="commodity-pipeline", log_prints=True)
 def commodity_pipeline_flow():
     fetch_eia_task()
