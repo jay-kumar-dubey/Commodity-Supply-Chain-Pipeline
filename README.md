@@ -63,7 +63,9 @@ FRED API (Shipping)  ──┘                            │
                           Streamlit Dashboard
                             (public, live)
 
-Orchestration: Prefect — runs monthly on the 5th at 9:00 AM
+Orchestration: Prefect flow triggered via GitHub Actions
+               Runs automatically on the 10th of every month at 10:00 AM IST
+               No local machine required — fully cloud-automated
 Storage region: AWS ap-south-1 (Mumbai)
 ```
 
@@ -116,9 +118,26 @@ The stress signal was backtested against 9 known supply chain disruption events 
 | Ingestion | Python, `requests`, `boto3` | Lightweight, no overhead for scheduled API pulls |
 | Storage | AWS S3 (ap-south-1) | Scalable object storage with Hive partitioning |
 | Transformation | dbt Core + DuckDB | SQL-based transformations with lineage, testing, and S3 Parquet export |
-| Orchestration | Prefect | Python-native, zero infrastructure overhead vs Airflow |
+| Orchestration | Prefect + GitHub Actions | Prefect manages flow logic; GitHub Actions schedules and executes automatically in the cloud |
 | Dashboard | Streamlit + Plotly | Python-native, fast iteration, free cloud deployment |
 | Deployment | Streamlit Cloud | Free public hosting, auto-redeploy on git push |
+| CI/CD | GitHub Actions | Fully automated monthly pipeline execution — no local machine required |
+
+---
+
+## Automated Pipeline Execution
+
+The pipeline runs automatically every month via GitHub Actions:
+
+- **Schedule:** 10th of every month at 10:00 AM IST (04:30 UTC)
+- **What runs:** EIA fetch → FRED fetch → S3 Bronze upload → dbt Silver → dbt Gold → S3 Parquet export
+- **Infrastructure required:** None — GitHub's cloud runners handle everything
+- **Manual trigger:** Available via the Actions tab on GitHub for on-demand runs
+
+To trigger manually:
+```
+GitHub repo → Actions → Monthly Pipeline Run → Run workflow
+```
 
 ---
 
@@ -145,6 +164,9 @@ Python unit tests cover ingestion error handling — empty API responses, missin
 
 ```
 Commodity-Supply-Chain-Pipeline/
+├── .github/
+│   └── workflows/
+│       └── pipeline.yml          # GitHub Actions — automated monthly execution
 ├── ingestion/
 │   ├── fetch_eia.py              # EIA WTI oil price fetcher
 │   └── fetch_bdi.py              # FRED PPIFIS shipping index fetcher
@@ -157,11 +179,12 @@ Commodity-Supply-Chain-Pipeline/
 │   │   └── gold/
 │   │       ├── gold_stress_signal.sql
 │   │       └── schema.yml        # dbt data quality tests
-│   └── macros/
-│       └── export_to_s3.sql      # post-hook: exports Parquet to S3
+│   ├── macros/
+│   │   └── export_to_s3.sql      # post-hook: exports Parquet to S3
+│   └── profiles.yml              # dbt connection config (uses env vars)
 ├── orchestration/
 │   └── dags/
-│       └── pipeline_flow.py      # Prefect flow (monthly schedule)
+│       └── pipeline_flow.py      # Prefect flow definition
 ├── dashboard/
 │   ├── app.py                    # Streamlit dashboard
 │   └── .streamlit/
@@ -199,8 +222,8 @@ python ingestion/fetch_bdi.py
 
 # 5. Run dbt transformations
 cd dbt_pipeline
-dbt run
-dbt test
+dbt run --profiles-dir .
+dbt test --profiles-dir .
 
 # 6. Launch dashboard
 cd ../dashboard
@@ -210,6 +233,9 @@ streamlit run app.py
 ---
 
 ## Engineering Decisions Worth Noting
+
+**Why GitHub Actions over a dedicated server?**
+GitHub Actions provides free cloud compute for scheduled workflows — up to 2,000 minutes/month on the free tier. For a monthly pipeline that runs in under 2 minutes, this is effectively unlimited free automation. No EC2 instance, no server maintenance, no cost.
 
 **Why Prefect over Airflow?**
 Airflow requires a scheduler, webserver, and database running simultaneously — significant infrastructure overhead for a pipeline that runs once a month. Prefect runs as a lightweight Python process with zero infrastructure. The tradeoff is Airflow's richer ecosystem, which becomes relevant at scale.
@@ -231,6 +257,3 @@ Prefect 3's ConcurrentTaskRunner uses Python's multiprocessing spawn method on W
 MCA — VIT Bhopal (CGPA 8.88) · Graduating 2026
 
 [LinkedIn](https://linkedin.com/in/jay-kumar-dubey-137b2823a) · [GitHub](https://github.com/jay-kumar-dubey)
-
-
-*Preparing: AWS Data Engineer Associate (DEA-C01) — September 2026*
