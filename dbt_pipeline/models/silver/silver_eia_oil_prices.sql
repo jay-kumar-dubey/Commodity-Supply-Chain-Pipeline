@@ -1,8 +1,8 @@
 {{ config(
-    materialized='table',
+    materialized='incremental',
+    unique_key='price_date',
     post_hook="{{ export_to_s3('silver_eia_oil_prices', 'silver/eia_oil_prices') }}"
 ) }}
-
 
 SELECT 
     price_date,
@@ -19,4 +19,7 @@ FROM (
     AND CAST(record.period as date) IS NOT NULL
 )
 GROUP BY price_date
+{% if is_incremental() %}
+HAVING price_date > (SELECT MAX(price_date) FROM {{ this }})
+{% endif %}
 ORDER BY price_date DESC

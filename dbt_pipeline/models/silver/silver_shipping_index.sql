@@ -1,8 +1,8 @@
 {{ config(
-    materialized='table',
+    materialized='incremental',
+    unique_key='index_date',
     post_hook="{{ export_to_s3('silver_shipping_index', 'silver/baltic_dry_index') }}"
 ) }}
-
 
 SELECT 
     index_date,
@@ -19,4 +19,7 @@ FROM (
     AND CAST(record.date as date) IS NOT NULL
 )
 GROUP BY index_date
+{% if is_incremental() %}
+HAVING index_date > (SELECT MAX(index_date) FROM {{ this }})
+{% endif %}
 ORDER BY index_date DESC

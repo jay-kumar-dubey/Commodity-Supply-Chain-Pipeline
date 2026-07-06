@@ -1,8 +1,8 @@
 {{ config(
-    materialized='table',
+    materialized='incremental',
+    unique_key='month',
     post_hook="{{ export_to_s3('gold_stress_signal', 'gold') }}"
 ) }}
-
 
 WITH monthly_oil AS (
     SELECT 
@@ -10,16 +10,17 @@ WITH monthly_oil AS (
         AVG(price_usd) as avg_oil_price
     FROM {{ ref('silver_eia_oil_prices') }}
     GROUP BY 1
-)
-, monthly_shipping AS (
+),
+
+monthly_shipping AS (
     SELECT 
         DATE_TRUNC('month', index_date) as month,
         AVG(index_value) as shipping_index
     FROM {{ ref('silver_shipping_index') }}
     GROUP BY 1
-)
+),
 
-, with_lag AS (
+with_lag AS (
     SELECT
         o.month,
         o.avg_oil_price,
@@ -36,9 +37,11 @@ SELECT
     shipping_index,
     (avg_oil_price - prev_oil) / prev_oil * 100 as oil_mom_change_pct,
     (shipping_index - prev_shipping) / prev_shipping * 100 as shipping_mom_change_pct,
-    ((shipping_index - prev_shipping) / prev_shipping * 100) - 
-    ((avg_oil_price - prev_oil) / prev_oil * 100) as stress_signal
-    
+    ((shipping_index - prev_shipping) / prev_shipping * 100)
+      - ((avg_oil_price - prev_oil) / prev_oil * 100) as stress_signal
 FROM with_lag
 WHERE prev_oil IS NOT NULL
+{% if is_incremental() %}
+  AND month > (SELECT MAX(month) FROM {{ this }})
+{% endif %}
 ORDER BY month DESC
