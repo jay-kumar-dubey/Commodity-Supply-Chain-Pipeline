@@ -37,16 +37,18 @@ def run_dbt_task():
     result = subprocess.run(
         ["python", "-m", "dbt", "run"],
         cwd=dbt_dir,
-        check=True,
         capture_output=True,
         text=True,
         env={**os.environ}
     )
+    
     logger.info(result.stdout)
-    if result.stderr:
-        logger.warning(result.stderr)
+    logger.error(result.stderr)
+    
+    if result.returncode != 0:
+        raise RuntimeError(f"dbt run failed with return code {result.returncode}")
+    
     logger.info("dbt transformations complete.")
-
 
 @flow(name="commodity-pipeline", log_prints=True)
 def commodity_pipeline_flow():
