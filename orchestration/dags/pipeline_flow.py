@@ -9,7 +9,7 @@ load_dotenv()
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 from ingestion.fetch_eia import main as eia_main
-from ingestion.fetch_bdi import main as bdi_main
+from ingestion.fetch_ppifis import main as ppifis_main
 
 DBT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'dbt_pipeline')
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'data', 'commodity_pipeline.duckdb')
@@ -43,10 +43,10 @@ def fetch_eia_task():
 
 
 @task(name="fetch_shipping_index", retries=3, retry_delay_seconds=60)
-def fetch_bdi_task():
+def fetch_ppifis_task():
     logger = get_run_logger()
     logger.info("Starting shipping index fetch...")
-    bdi_main()
+    ppifis_main()
     logger.info("Shipping index fetch complete.")
 
 
@@ -120,7 +120,7 @@ def export_gold_task():
 def commodity_pipeline_flow():
     sync_warehouse_task()
     fetch_eia_task()
-    fetch_bdi_task()
+    fetch_ppifis_task()
     run_dbt_task()
     export_gold_task()
 

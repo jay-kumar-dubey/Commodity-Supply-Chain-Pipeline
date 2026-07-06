@@ -15,9 +15,9 @@ if not API_KEY:
 
 BASE_URL = "https://api.stlouisfed.org/fred/series/observations"
 
-def bdi_data(start_date: str, end_date: str) -> dict:
+def fetch_ppifis_data(start_date: str, end_date: str) -> dict:
     """
-    Fetch FRED data from the EIA API.
+    Fetch PPIFIS (shipping cost proxy) data from the FRED API.
     """
     params = {
     "series_id": "PPIFIS",
@@ -74,7 +74,7 @@ def main():
     fetch_month = datetime.today().strftime("%Y-%m")
     
     print(f"Fetching shipping index from {start} to {today}...")
-    data = bdi_data(start_date=start, end_date=today)
+    data = fetch_ppifis_data(start_date=start, end_date=today)
     
     record_count = len(data['observations'])
     print(f"Records fetched: {record_count}")
