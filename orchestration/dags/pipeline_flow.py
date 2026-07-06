@@ -31,23 +31,22 @@ def fetch_bdi_task():
 def run_dbt_task():
     logger = get_run_logger()
     logger.info("Running dbt transformations...")
+    
+    dbt_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'dbt_pipeline')
+    
     result = subprocess.run(
-        ["dbt", "run"],
-        cwd=DBT_DIR,
+        ["python", "-m", "dbt", "run"],
+        cwd=dbt_dir,
         check=True,
         capture_output=True,
-        text=True
+        text=True,
+        env={**os.environ}
     )
     logger.info(result.stdout)
+    if result.stderr:
+        logger.warning(result.stderr)
     logger.info("dbt transformations complete.")
 
-# @flow(name="commodity-pipeline", log_prints=True) 
-# Prefect 3 issue on Windows with .submit() — 
-# the concurrent task runner crashes immediately on Windows due to how Python handles multiprocessing there.
-# def commodity_pipeline_flow(): 
-#     future1 = fetch_eia_task.submit()
-#     future2 = fetch_bdi_task.submit()
-#     run_dbt_task.submit(wait_for=[future1, future2])
 
 @flow(name="commodity-pipeline", log_prints=True)
 def commodity_pipeline_flow():
