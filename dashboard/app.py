@@ -82,8 +82,6 @@ months_in_stress = (df['stress_signal'] > STRESS_THRESHOLD).sum()
 total_months = len(df)
 
 EVENTS = [
-    {"date": "2008-07-01", "label": "Oil peaks $147", "color": "#ff6b6b"},
-    {"date": "2008-10-01", "label": "Financial crisis", "color": "#ff6b6b"},
     {"date": "2011-02-01", "label": "Arab Spring", "color": "#ffa500"},
     {"date": "2014-11-01", "label": "OPEC price war", "color": "#ffa500"},
     {"date": "2016-01-01", "label": "Oil hits 12yr low", "color": "#ff6b6b"},
