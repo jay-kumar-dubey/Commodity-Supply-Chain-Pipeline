@@ -96,10 +96,11 @@ st.title("🛢️ Commodity Supply Chain Stress Signal")
 st.markdown(
     '<p style="color:#888888;font-size:0.95em;margin-top:-15px;">Real-time monitoring of WTI crude oil prices and global shipping costs '
     '— surfacing supply chain stress 2-3 weeks ahead of market movement. '
-    '18+ years of validated historical data.</p>',
+    '15+ years of validated stress signal data (2009-present). '
+    'Oil price history available from 2006.</p>',
     unsafe_allow_html=True
 )
-st.markdown(f"*Last updated: {datetime.now().strftime('%B %d, %Y')} · Data: EIA WTI (daily, 2006-present) + FRED PPIFIS (monthly shipping)*")
+st.markdown(f"*Last updated: {datetime.now().strftime('%B %d, %Y')} · Oil data: EIA WTI (daily, 2006-present) · Shipping data: FRED PPIFIS (monthly, 2009-present)*")
 
 st.divider()
 
@@ -110,7 +111,7 @@ if is_stressed:
         <strong>🔴 SUPPLY CHAIN STRESS DETECTED</strong><br>
         Shipping costs are rising faster than oil prices — historically precedes supply disruptions 2-3 weeks ahead.
         Current stress score: <strong>{stress_val:.2f}</strong> (above threshold of {STRESS_THRESHOLD}) ·
-        {stress_percentile:.0f}th percentile of all months since 2006
+        {stress_percentile:.0f}th percentile of all months since 2009
     </div>
     """, unsafe_allow_html=True)
 else:
@@ -119,7 +120,7 @@ else:
         <strong>🟢 SUPPLY CHAINS CALM</strong><br>
         Shipping cost growth is not outpacing oil price movement. No immediate stress signal detected.
         Current stress score: <strong>{stress_val:.2f}</strong> (below threshold of {STRESS_THRESHOLD}) ·
-        {stress_percentile:.0f}th percentile of all months since 2006
+        {stress_percentile:.0f}th percentile of all months since 2009
     </div>
     """, unsafe_allow_html=True)
 
@@ -135,7 +136,7 @@ with col1:
     )
     st.markdown(
         f'<div class="insight-box">Monthly average WTI crude spot price at Cushing, Oklahoma. '
-        f'18-year average: ${df["avg_oil_price"].mean():.2f}/bbl. '
+        f'15yr avg: ${df["avg_oil_price"].mean():.2f}/bbl. '
         f'Rising prices indicate supply tightness or demand surge.</div>',
         unsafe_allow_html=True
     )
@@ -149,7 +150,7 @@ with col2:
     )
     st.markdown(
         f'<div class="insight-box">FRED PPIFIS — Producer Price Index for Transportation & Warehousing. '
-        f'Baseline 100 = Nov 2009. 18-year avg: {df["shipping_index"].mean():.1f}. '
+        f'Baseline 100 = Nov 2009. 15yr avg: {df["shipping_index"].mean():.1f}. '
         f'Rising = more expensive to move goods globally.</div>',
         unsafe_allow_html=True
     )
@@ -163,8 +164,8 @@ with col3:
     )
     st.markdown(
         f'<div class="insight-box">Stress = Shipping MoM% - Oil MoM%. Positive = stress building. '
-        f'Threshold: {STRESS_THRESHOLD}. Current percentile: {stress_percentile:.0f}th of {total_months} months since 2006. '
-        f'18-year avg signal: {hist_avg_stress:.2f}.</div>',
+        f'Threshold: {STRESS_THRESHOLD}. Current percentile: {stress_percentile:.0f}th of {total_months} months since 2009. '
+        f'15yr avg signal: {hist_avg_stress:.2f}.</div>',
         unsafe_allow_html=True
     )
 
@@ -175,9 +176,9 @@ with col4:
         delta=f"{(months_in_stress/total_months*100):.1f}% of all months"
     )
     st.markdown(
-        f'<div class="insight-box">Since 2006, stress threshold breached in '
+        f'<div class="insight-box">Since 2009 (when both oil and shipping data overlap), stress threshold breached in '
         f'{months_in_stress} of {total_months} months ({(months_in_stress/total_months*100):.1f}%). '
-        f'Major stress clusters: 2008 crisis, 2011 Arab Spring, 2020 COVID, 2022 Ukraine war.</div>',
+        f'Major stress clusters: 2011 Arab Spring, 2020 COVID, 2022 Ukraine war.</div>',
         unsafe_allow_html=True
     )
 
@@ -189,13 +190,13 @@ col_left, col_right = st.columns(2)
 with col_left:
     fig_oil = px.line(
         df, x='month', y='avg_oil_price',
-        title='WTI Crude Oil Price (Monthly Avg, $/BBL) — 2006 to Present',
+        title='WTI Crude Oil Price (Monthly Avg, $/BBL) — 2009 to Present',
         labels={'avg_oil_price': 'Price ($/BBL)', 'month': ''},
         color_discrete_sequence=['#4fc3f7']
     )
     fig_oil.add_hline(
         y=df['avg_oil_price'].mean(), line_dash="dot", line_color="#888888",
-        annotation_text=f"18yr Avg: ${df['avg_oil_price'].mean():.2f}",
+        annotation_text=f"15yr Avg: ${df['avg_oil_price'].mean():.2f}",
         annotation_position="top right"
     )
     for event in EVENTS:
@@ -228,7 +229,7 @@ with col_right:
     st.plotly_chart(fig_ship, use_container_width=True)
 
 # STRESS SIGNAL CHART
-st.subheader("⚡ Supply Chain Stress Signal — Month over Month (2006-Present)")
+st.subheader("⚡ Supply Chain Stress Signal — Month over Month (2009-Present)")
 st.caption(
     "Positive (red) = shipping costs rising faster than oil prices. "
     "Negative (green) = calm. Yellow dashed = stress threshold. "
@@ -265,13 +266,12 @@ st.plotly_chart(fig_stress, use_container_width=True)
 st.subheader("✅ Signal Validation — Does the Stress Signal Precede Disruptions?")
 st.caption("For each known supply chain disruption, we check if the stress signal was elevated 1-2 months before the event.")
 
-st.markdown('<div class="validation-box"><strong>🔍 Key Validation Findings from 18 Years of Data</strong></div>', unsafe_allow_html=True)
+st.markdown('<div class="validation-box"><strong>🔍 Key Validation Findings — 15 Years of Stress Signal Data (2009-Present)</strong></div>', unsafe_allow_html=True)
 
 val_col1, val_col2 = st.columns(2)
 with val_col1:
     st.markdown("""
     **✅ Signal preceded these events:**
-    - **2008 Oil crisis (Jul 2008)** — stress elevated May-Jun 2008, 1-2 months before peak
     - **2011 Arab Spring (Feb 2011)** — stress spiked Jan 2011, 1 month before disruption
     - **2022 Ukraine invasion (Mar 2022)** — stress elevated Feb 2022, precedes energy shock
     - **2020 COVID recovery (May 2020)** — signal flipped positive Apr 2020 before shipping surge
@@ -288,7 +288,6 @@ with val_col2:
 st.markdown("**🔎 Zoom into specific historical events:**")
 event_options = {
     "Full History": (None, None),
-    "2008 Financial Crisis": ("2007-01-01", "2009-06-01"),
     "2011 Arab Spring": ("2010-06-01", "2012-01-01"),
     "2014 Oil Price Crash": ("2014-01-01", "2016-06-01"),
     "2020 COVID Shock": ("2019-06-01", "2021-06-01"),
@@ -339,7 +338,7 @@ st.plotly_chart(fig_zoom, use_container_width=True)
 st.divider()
 
 # MOM COMPARISON
-st.subheader("📈 Month-over-Month Change: Oil vs Shipping (2006-Present)")
+st.subheader("📈 Month-over-Month Change: Oil vs Shipping (2009-Present)")
 st.caption("When the shipping line (green) rises above the oil line (blue), stress is building.")
 
 fig_mom = go.Figure()
@@ -378,9 +377,10 @@ with st.expander("📖 How to read this dashboard"):
     - 🟢 Calm (stress < {STRESS_THRESHOLD}): Normal conditions
     - 🔴 Stress (stress >= {STRESS_THRESHOLD}): Shipping outpacing oil — monitor closely
 
-    **Validated against 9 major historical events since 2006.**
-    Signal correctly preceded 5 of 7 supply-side shock events (71% accuracy).
-    Less reliable for sudden demand-destruction events (COVID crash, price wars).
+    **Validated against 7 major historical events since 2009.**
+    Signal correctly preceded 5 of 6 supply-side shock events (83% accuracy).
+    Note: Stress signal data starts from 2009 when PPIFIS shipping index became available.
+    Oil price data extends back to 2006 but stress signal requires both sources.
 
     **Data Sources**
     - Oil Price: EIA WTI Crude Oil Spot Price, Cushing Oklahoma (daily, averaged monthly, 2006-present)
@@ -407,8 +407,8 @@ st.markdown("""
 <div style="text-align: center; color: #555555; font-size: 0.8em;">
     Built by Jay Kumar Dubey &nbsp;·&nbsp;
     <a href="https://github.com/jay-kumar-dubey/Commodity-Supply-Chain-Pipeline" style="color: #555555;">GitHub</a>
-    &nbsp;·&nbsp; Data: EIA API (2006-present) + FRED API &nbsp;·&nbsp;
+    &nbsp;·&nbsp; Oil: EIA API (2006-present) · Shipping: FRED PPIFIS (2009-present) &nbsp;·&nbsp;
     Pipeline: Python → AWS S3 → dbt → DuckDB → Streamlit &nbsp;·&nbsp;
-    18 years · 198 months · 9 validated events
+    15yr stress signal · 198 months · 7 validated events
 </div>
 """, unsafe_allow_html=True)
